@@ -8,6 +8,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var ENV *config
+
 type config struct {
 	environmentRoute string
 	dbName           string
@@ -38,6 +40,7 @@ func (c *config) SetConfigFile() {
 	c.dbPort = getenv("DB_PORT", "5432")
 	c.dbSSL = getenv("DB_SSL", "disable")
 	c.jwtKey = getenv("JWT", "")
+	ENV = c
 }
 
 func (c *config) GetPostgresConfig() string {

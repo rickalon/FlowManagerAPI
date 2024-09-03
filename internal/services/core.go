@@ -1,29 +1,87 @@
 package services
 
 import (
-	"errors"
+	"encoding/json"
+	"io"
+	"log"
+	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/rickalon/FlowManagerAPI/internal/domain"
+	"github.com/rickalon/FlowManagerAPI/internal/middleware"
 	"github.com/rickalon/FlowManagerAPI/internal/repositories"
+	"github.com/rickalon/FlowManagerAPI/pkg/utils"
 )
 
-func ValidateUser(user *domain.User) error {
-	if user.Name == "" {
-		return errors.New("name should be included")
-	}
-	if user.Email == "" {
-		return errors.New("email should be included")
-	}
-	if user.Password == "" {
-		return errors.New("password should be included")
-	}
-	return nil
+type Service struct {
+	Router *mux.Router
+	DB     *repositories.PqDB
 }
 
-func CreateUser(db *repositories.PqDB, user *domain.User) error {
-	_, err := db.DB.Exec("INSERT INTO USERS(full_name,password,email) VALUES ($1,$2,$3);", user.Name, user.Password, user.Email)
+type TokenJWT struct {
+	Token string `json:"token"`
+}
+
+func NewService(router *mux.Router, DB *repositories.PqDB) *Service {
+	return &Service{Router: router, DB: DB}
+}
+
+func (service *Service) RegisterUser(w http.ResponseWriter, r *http.Request) {
+	log.Println("Registering user")
+	body, err := io.ReadAll(r.Body)
+	defer r.Body.Close()
 	if err != nil {
-		return err
+		log.Println("Error reading request.")
+		utils.WriteJSON(w, http.StatusInternalServerError, utils.ErrorResponse{Error: "Error reading the request"})
+		return
 	}
-	return nil
+	var user *domain.User
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		log.Println("Error unmarshaling the body.")
+		utils.WriteJSON(w, http.StatusInternalServerError, utils.ErrorResponse{Error: "Error reading the content"})
+		return
+	}
+
+	if err = domain.ValidateUser(user); err != nil {
+		log.Println(err)
+		utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	hashPassword, err := utils.HashPassword(user.Password)
+	if err != nil {
+		log.Println(err)
+		utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: err.Error()})
+		return
+	}
+	user.Password = hashPassword
+
+	if err = domain.CreateUser(service.DB, user); err != nil {
+		log.Println(err)
+		utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	if err = domain.GetIdUser(service.DB, user); err != nil {
+		log.Println(err)
+		utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	log.Println("Token generation")
+	tokenString, err := middleware.CreateTokenJWTCookie(w, user.Id)
+	if err != nil {
+		log.Println(err)
+		utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	token := &TokenJWT{Token: tokenString}
+	utils.WriteJSON(w, http.StatusAccepted, token)
+
+}
+
+func (service *Service) LoginUser(w http.ResponseWriter, r *http.Request) {
+
 }
