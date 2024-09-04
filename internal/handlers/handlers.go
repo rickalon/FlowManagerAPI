@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/rickalon/FlowManagerAPI/internal/middleware"
 	"github.com/rickalon/FlowManagerAPI/internal/repositories"
 	"github.com/rickalon/FlowManagerAPI/internal/services"
 
@@ -21,7 +22,7 @@ func (handler *Handler) CreateHandlers() {
 	service := services.NewService(handler.Router, handler.DB)
 	handler.Router.HandleFunc("/user/register", service.RegisterUser).Methods("POST")
 	handler.Router.HandleFunc("/user/login", service.LoginUser).Methods("POST")
-	//edit projects
-
-	//edit tasks
+	//projects
+	handler.Router.HandleFunc("/proyect", middleware.ValidateJWT(service.CreateProyect, service)).Methods("POST")
+	//tasks
 }

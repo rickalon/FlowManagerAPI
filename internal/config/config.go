@@ -39,7 +39,7 @@ func (c *config) SetConfigFile() {
 	c.dbHost = getenv("DB_HOST", "localhost")
 	c.dbPort = getenv("DB_PORT", "5432")
 	c.dbSSL = getenv("DB_SSL", "disable")
-	c.jwtKey = getenv("JWT", "")
+	c.jwtKey = getenv("JWT_SECRET", "")
 	ENV = c
 }
 

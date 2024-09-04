@@ -71,3 +71,11 @@ func GetLoginUser(db *repositories.PqDB, user *User) error {
 	}
 	return nil
 }
+
+func GetIdUserById(db *repositories.PqDB, id int) error {
+	_, err := db.DB.Exec("SELECT user_id from USERS where email=$1", id)
+	if err != nil {
+		return err
+	}
+	return nil
+}

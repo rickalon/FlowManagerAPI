@@ -8,7 +8,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rickalon/FlowManagerAPI/internal/domain"
-	"github.com/rickalon/FlowManagerAPI/internal/middleware"
 	"github.com/rickalon/FlowManagerAPI/internal/repositories"
 	"github.com/rickalon/FlowManagerAPI/pkg/utils"
 )
@@ -70,7 +69,7 @@ func (service *Service) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println("Token generation")
-	tokenString, err := middleware.CreateTokenJWTCookie(w, user.Id)
+	tokenString, err := utils.CreateTokenJWTCookie(w, user.Id)
 	if err != nil {
 		log.Println(err)
 		utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: err.Error()})
@@ -121,7 +120,7 @@ func (service *Service) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Usuario logeado es: ", user)
 
-	strToken, err := middleware.CreateTokenJWTCookie(w, user.Id)
+	strToken, err := utils.CreateTokenJWTCookie(w, user.Id)
 	if err != nil {
 		log.Println("Error generating the token")
 		utils.WriteJSON(w, http.StatusInternalServerError, utils.ErrorResponse{Error: "Error generating the token"})
@@ -129,4 +128,8 @@ func (service *Service) LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusAccepted, &TokenJWT{Token: strToken})
+}
+
+func (service *Service) CreateProyect(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 }
