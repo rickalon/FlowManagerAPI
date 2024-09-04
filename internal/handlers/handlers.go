@@ -24,5 +24,7 @@ func (handler *Handler) CreateHandlers() {
 	handler.Router.HandleFunc("/user/login", service.LoginUser).Methods("POST")
 	//projects
 	handler.Router.HandleFunc("/proyect", middleware.ValidateJWT(service.CreateProyect, service)).Methods("POST")
+	handler.Router.HandleFunc("/proyect/{id}", middleware.ValidateJWT(service.GetProyect, service)).Methods("GET")
+	handler.Router.HandleFunc("/proyect/{id}", middleware.ValidateJWT(service.DeleteProyect, service)).Methods("DELETE")
 	//tasks
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/rickalon/FlowManagerAPI/pkg/utils"
 )
 
-func ValidateJWT(handler http.HandlerFunc, service *services.Service) http.HandlerFunc {
+func ValidateJWT(handler func(w http.ResponseWriter, r *http.Request, id int), service *services.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		strSecret := []byte(config.ENV.GetJWTKey())
@@ -33,10 +33,11 @@ func ValidateJWT(handler http.HandlerFunc, service *services.Service) http.Handl
 			utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: err.Error()})
 			return
 		}
-
+		var idUser int
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			if id, ok := claims["user_id"]; ok {
-				err = domain.GetIdUserById(service.DB, int(id.(float64)))
+				idUser = int(id.(float64))
+				err = domain.GetIdUserById(service.DB, idUser)
 				if err != nil {
 					log.Println(err)
 					utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: err.Error()})
@@ -55,7 +56,7 @@ func ValidateJWT(handler http.HandlerFunc, service *services.Service) http.Handl
 			return
 		}
 
-		handler(w, r)
+		handler(w, r, idUser)
 	}
 }
 
