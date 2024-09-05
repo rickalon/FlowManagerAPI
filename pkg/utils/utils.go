@@ -31,7 +31,7 @@ func HashLogin(hash, pass string) error {
 
 func CreateTokenJWTCookie(w http.ResponseWriter, id int) (string, error) {
 
-	expires := time.Now().Add(time.Minute * 10)
+	expires := time.Now().Add(time.Minute * 50)
 	claims := jwt.MapClaims{
 		"exp":     expires.Unix(),
 		"user_id": id,

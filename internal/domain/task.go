@@ -1,7 +1,9 @@
 package domain
 
 import (
+	"database/sql"
 	"errors"
+	"log"
 
 	"github.com/rickalon/FlowManagerAPI/internal/repositories"
 )
@@ -27,6 +29,7 @@ func ValidateTask(t *Task) error {
 }
 
 func CreateTask(db *repositories.PqDB, t *Task) error {
+	log.Println(t)
 	if t.Status == "" {
 		_, err := db.DB.Exec("INSERT INTO TASKS (content,proyect_id,user_id) values ($1,$2,$3)", t.Content, t.ProyectId, t.UserId)
 		return err
@@ -38,4 +41,13 @@ func CreateTask(db *repositories.PqDB, t *Task) error {
 
 func GetTaskByIds(db *repositories.PqDB, t *Task) error {
 	return db.DB.QueryRow("SELECT content,status,proyect_id,created_at from tasks").Scan(&t.Content, &t.Status, &t.ProyectId, &t.CreatedAt)
+}
+
+func GetTaskByProject(db *repositories.PqDB, t *Task, p *Proyect) (*sql.Rows, error) {
+	return db.DB.Query("select task_id,content,status,user_id,created_at from tasks where proyect_id=$1", p.Proyect_id)
+}
+
+func DeleteTasksByProyectId(db *repositories.PqDB, p *Proyect) error {
+	_, err := db.DB.Exec("DELETE FROM tasks where proyect_id=$1", p.Proyect_id)
+	return err
 }
