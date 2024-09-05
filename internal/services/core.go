@@ -201,22 +201,81 @@ func (service *Service) DeleteProyect(w http.ResponseWriter, r *http.Request, id
 	defer r.Body.Close()
 	vars := mux.Vars(r)
 	id := vars["id"]
-	idUser, err := strconv.Atoi(id)
-	log.Println("Deletting proyect id: ", idUser)
+	idProyect, err := strconv.Atoi(id)
+	log.Println("Deletting proyect id: ", idProyect)
 	if err != nil {
 		log.Println(err)
 		utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	proyect := &domain.Proyect{Proyect_id: idUser}
-	//First delete all the tasks for this proyect
+	proyect := &domain.Proyect{Proyect_id: idProyect}
+
+	//1 get all the tasks for the project
+
+	//delete all the tasks
+
+	//delete the proyect
 	if err = domain.RemoveProyect(service.DB, proyect); err != nil {
 		log.Println(err)
 		utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: err.Error()})
 		return
 	}
-	//get all the proyects
 	utils.WriteJSON(w, http.StatusAccepted, &JsonInfo{Info: "task and proyect deleted"})
+
+}
+
+func (service *Service) CreateTask(w http.ResponseWriter, r *http.Request, idUser int) {
+	defer r.Body.Close()
+	log.Println("Creaitng task")
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println("Error reading request.")
+		utils.WriteJSON(w, http.StatusInternalServerError, utils.ErrorResponse{Error: "Error reading the request"})
+		return
+	}
+	var task *domain.Task
+	err = json.Unmarshal(body, &task)
+	if err != nil {
+		log.Println("Error unmarshaling the body.")
+		utils.WriteJSON(w, http.StatusInternalServerError, utils.ErrorResponse{Error: "Error reading the content"})
+		return
+	}
+	task.Task_id = idUser
+	if err = domain.ValidateTask(task); err != nil {
+		log.Println(err)
+		utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	if err = domain.CreateTask(service.DB, task); err != nil {
+		log.Println(err)
+		utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusAccepted, &JsonInfo{"Task created"})
+
+}
+
+func (service *Service) GetTask(w http.ResponseWriter, r *http.Request, idUser int) {
+	defer r.Body.Close()
+	vars := mux.Vars(r)
+	id := vars["id"]
+	idTask, err := strconv.Atoi(id)
+	log.Println("Getting task id: ", idTask)
+	if err != nil {
+		log.Println(err)
+		utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	task := &domain.Task{Task_id: idTask, UserId: idUser}
+	if err = domain.GetTaskByIds(service.DB, task); err != nil {
+		log.Println("Task for the user ", task.UserId, " doesn't exist")
+		utils.WriteJSON(w, http.StatusBadRequest, utils.ErrorResponse{Error: "Task for the user " + string(task.UserId) + " doesn't exist"})
+		return
+	}
+	utils.WriteJSON(w, http.StatusAccepted, task)
 
 }
