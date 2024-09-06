@@ -12,9 +12,9 @@ REST API with Go for basic project management functionalities, similar to tools 
 ![image](https://github.com/user-attachments/assets/10adb936-1c3a-47ea-8c2b-c741db27dc98)
 
 # Instalation
-1 - Clone the repository: git clone https://github.com/rickalon/FlowManagerAPI.git
-2 - Navigate to the project directory
-3 - make run  
+- Clone the repository: git clone https://github.com/rickalon/FlowManagerAPI.git
+- Navigate to the project directory
+- make run  
 
 
 
