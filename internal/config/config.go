@@ -31,12 +31,14 @@ func (c *config) SetConfigFile() {
 
 	err := godotenv.Load(c.environmentRoute)
 	if err != nil {
-		log.Fatalf("Can't read environment variables from file %v\n", c.environmentRoute)
+		log.Println("Reading environmnet variable variables.")
+	} else {
+		log.Println("Reading environment variables from file %v\n", c.environmentRoute)
 	}
 	c.dbName = getenv("DB_NAME", "postgres")
 	c.dbUser = getenv("DB_USER", "postgres")
 	c.dbPassword = getenv("DB_PASSWORD", "1234567")
-	c.dbHost = getenv("DB_HOST", "localhost")
+	c.dbHost = getenv("DB_HOST", "0.0.0.0")
 	c.dbPort = getenv("DB_PORT", "5432")
 	c.dbSSL = getenv("DB_SSL", "disable")
 	c.jwtKey = getenv("JWT_SECRET", "")
@@ -44,7 +46,7 @@ func (c *config) SetConfigFile() {
 }
 
 func (c *config) GetPostgresConfig() string {
-	return fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s", c.dbName, c.dbPassword, c.dbHost, c.dbName, c.dbSSL)
+	return fmt.Sprintf("postgres://%s:%s/%s?sslmode=%s&user=%s&password=%s", c.dbHost, c.dbPort, c.dbName, c.dbSSL, c.dbUser, c.dbPassword)
 }
 
 func (c *config) GetJWTKey() string {

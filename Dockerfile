@@ -1,23 +1,12 @@
 FROM golang:1.23.1-bookworm AS build-stage
-    WORKDIR /app
-
-    COPY go.mod go.sum ./
-
-    RUN go mod download
-
-    COPY . .
-
-    RUN ls -al ./cmd/FlowManagerAPI/
-    
-    RUN CGO_ENABLED=0 GOOS=linux go build -o api ./cmd/FlowManagerAPI/main.go
-
-    RUN ls -al
+WORKDIR /app
+COPY . .
+RUN go mod download   
+RUN CGO_ENABLED=0 GOOS=linux go build -o flowManagerApi ./cmd/FlowManagerAPI/main.go
 
 FROM scratch AS build-release-stage
-    WORKDIR /
-  
-    COPY --from=build-stage /app/api ./api
-  
-    EXPOSE 8080
-  
-    ENTRYPOINT ["/api"]
+WORKDIR /app
+COPY --from=build-stage /app/flowManagerApi .
+ENV DB_PORT=5432
+EXPOSE 8080
+ENTRYPOINT ["./flowManagerApi"]

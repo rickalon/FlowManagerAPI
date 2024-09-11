@@ -18,12 +18,8 @@ func main() {
 	pqDB.SetUpDatabases()
 	log.Println("[3] Configuring the router")
 	router := router.NewRouter(":8080", pqDB) //localhost:8080
-	log.Println("[4] Configuring the handlers")
+	log.Println("[4] Configuring the handlers and services[5]")
 	router.CreateHandlersForSubrouter()
-	log.Println("[5] Configuring the services")
-
 	log.Println("[6] ON...")
 	router.StartListenAndServe()
-	log.Println("[7] ...Stopping the API")
-
 }

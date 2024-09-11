@@ -13,6 +13,9 @@ import (
 	"github.com/rickalon/FlowManagerAPI/pkg/utils"
 )
 
+type IService interface {
+	RegisterUser(w http.ResponseWriter, r *http.Request)
+}
 type Service struct {
 	Router *mux.Router
 	DB     *repositories.PqDB
