@@ -11,6 +11,8 @@ services:
       - "7000:5432"
     networks:
       - apinetwork
+    volumes:
+      - api_data:/var/lib/postgresql/data 
     healthcheck:
       test: pg_isready -U bayau -d dbjr -h localhost && echo "que es esto"
       interval: 3s
@@ -35,3 +37,5 @@ services:
 
 networks:
   apinetwork:
+volumes:
+  api_data:
