@@ -11,7 +11,7 @@ REST API with Go for basic project management functionalities, similar to tools 
 # Database diagram:
 ![image](https://github.com/user-attachments/assets/10adb936-1c3a-47ea-8c2b-c741db27dc98)
 
-#Deployment
+# Deployment
 - Build the Dockerfile with the tag fmapi:2.0
 - Configure the enviroment variables that the api and postgres are going to use
 - Ex:
